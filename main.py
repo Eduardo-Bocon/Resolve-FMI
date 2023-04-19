@@ -20,7 +20,9 @@ root.iconbitmap(default=icon)
 userInput = tk.StringVar()
 userInput.set("")
 
-lastColumn = tk.IntVar()
+lastColumn = tk.IntVar() # salva qual foi a ultima coluna calculada
+
+numOfVar = tk.IntVar() # salva o numero de variaveis
 
 # Funções para entrada do usuario
 def addP():
@@ -73,10 +75,10 @@ def checkLastCharAndOr():
     return True
 
 # funcoes para a tabela da verdade
-def printTruthTable(truthTable, numOfVar):
+def printTruthTable(truthTable):
     spaceBetwColumns = 30
     spaceBetwLines = 50
-    for i in range(1,(2**numOfVar)+1):
+    for i in range(1,(2**numOfVar.get())+1):
         for k in range(len(userInput.get())):
             char = tk.Label(root, text=truthTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
             char.place(x=8+spaceBetwColumns*k, y=200+spaceBetwLines*i)
@@ -84,13 +86,13 @@ def printTruthTable(truthTable, numOfVar):
     lastColumnLabel = tk.Label(root, text="Ultima coluna: " + str(lastColumn.get()+1), font="Verdana, 20", bg=darkGrey, fg=lightGrey)
     lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
 
-def putTruthVariables(truthTable, auxTable, numOfVar):
-    for i in range(1,(2**numOfVar)+1):
+def putTruthVariables(truthTable, auxTable):
+    for i in range(1,(2**numOfVar.get())+1):
         binary = bin(i-1)[2:]
         binary = str(binary)
 
         # botar zeros antes caso precise
-        while len(binary) < numOfVar:
+        while len(binary) < numOfVar.get():
             binary = '0' + binary
 
         for k in range(len(userInput.get())):
@@ -111,10 +113,10 @@ def putTruthVariables(truthTable, auxTable, numOfVar):
             else:
                 truthTable[i][k] = "-"
 
-def putTruthAndOr(truthTable, auxTable, numOfVar):
+def putTruthAndOr(truthTable, auxTable):
     for i in range(len(userInput.get())):
         if truthTable[0][i] == '∨':
-            for k in range(1, (2**numOfVar)+1):
+            for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i-1] == "T" or auxTable[k][i+1] == "T":
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
@@ -128,7 +130,7 @@ def putTruthAndOr(truthTable, auxTable, numOfVar):
             lastColumn.set(i)
             print(i)
         if truthTable[0][i] == '∧':
-            for k in range(1, (2**numOfVar)+1):
+            for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i-1] == "T" and auxTable[k][i+1] == "T":
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
@@ -141,10 +143,10 @@ def putTruthAndOr(truthTable, auxTable, numOfVar):
                     auxTable[k][i - 1] = "F"
             lastColumn.set(i)
 
-def putNeg(truthTable, auxTable, numOfVar):
+def putNeg(truthTable, auxTable):
     for i in range(len(userInput.get())):
         if truthTable[0][i] == "¬":
-            for k in range(1, (2**numOfVar)+1):
+            for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i+1] == "T":
                     truthTable[k][i] = "F"
                     auxTable[k][i] = "F"
@@ -153,7 +155,14 @@ def putNeg(truthTable, auxTable, numOfVar):
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
                     auxTable[k][i + 1] = "T"
-            lastColumn = i
+            lastColumn.set(i)
+
+def setNumberOfVariables():
+    numOfVar.set(0)
+    if 'P' in userInput.get():
+        numOfVar.set(numOfVar.get() + 1)
+    if 'Q' in userInput.get():
+        numOfVar.set(numOfVar.get() + 1)
 
 # Função principal da tabela da verdade
 def truthTable():
@@ -162,10 +171,11 @@ def truthTable():
     clearTable = tk.Label(root, text=" "*30, font=("Arial, 200"), bg=darkGrey)
     clearTable.place(x=0, y=200)
 
+    setNumberOfVariables()
+
     # cria uma matriz para a tabela
-    numOfVar = 2
     truthTable = []
-    for i in range((2**numOfVar)+1):
+    for i in range((2**numOfVar.get())+1):
         row = []
         for j in range(len(userInput.get())):
             row.append(0)
@@ -173,7 +183,7 @@ def truthTable():
     truthTable[0] = userInput.get()
 
     auxTable = []
-    for i in range((2 ** numOfVar) + 1):
+    for i in range((2 ** numOfVar.get()) + 1):
         row = []
         for j in range(len(userInput.get())):
             row.append(0)
@@ -187,18 +197,18 @@ def truthTable():
         upperTable.place(x=5+spaceBetwChar*i, y=200)
 
     # Coloca os verdadeiros e falsos nas variaveis
-    putTruthVariables(truthTable, auxTable, numOfVar)
+    putTruthVariables(truthTable, auxTable)
 
     # faz as negações
-    putNeg(truthTable, auxTable, numOfVar)
+    putNeg(truthTable, auxTable)
 
     # Faz And e Or
-    putTruthAndOr(truthTable, auxTable, numOfVar)
+    putTruthAndOr(truthTable, auxTable)
 
 
 
     # Mostra a tabela
-    printTruthTable(truthTable, numOfVar)
+    printTruthTable(truthTable)
 
 # Textos e Botões iniciais
 
