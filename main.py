@@ -89,10 +89,10 @@ def printTruthTable(truthTable):
 def printAuxTable(auxTable):
     spaceBetwColumns = 30
     spaceBetwLines = 50
-    for i in range(1,(2**numOfVar.get())+1):
+    for i in range(0,(2**numOfVar.get())+1):
         for k in range(len(userInput.get())):
             char = tk.Label(root, text=auxTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
-            char.place(x=8+spaceBetwColumns*k, y=200+spaceBetwLines*i)
+            char.place(x=250+spaceBetwColumns*k, y=200+spaceBetwLines*i)
     i = i + 1
     lastColumnLabel = tk.Label(root, text="Ultima coluna: " + str(lastColumn.get()+1), font="Verdana, 20", bg=darkGrey, fg=lightGrey)
     lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
@@ -225,14 +225,26 @@ def truthTable():
         for k in range(len(indexesOpenParenth)):
             if indexesOpenParenth[k] > startString and indexesOpenParenth[k] < finishString:
                 startString = indexesOpenParenth[k]
-        print("Calculando de {} até {}".format(startString, finishString))
-        auxTable[0] = auxTable[0][:startString] + " "*(finishString-startString) + auxTable[0][finishString:]
-        print(auxTable[0])
-        # faz as negações
+
+        # Remove os indices escolhidos para não serem escolhidos denovo
+        indexesOpenParenth.remove(startString)
+        indexesCloseParenth.remove(finishString)
+
+        # Faz as negações
         putNeg(truthTable, auxTable, startString, finishString)
 
         # Faz And e Or
         putTruthAndOr(truthTable, auxTable, startString, finishString)
+
+        # Bota os V e F nas colunas dos parenteses na tabela auxiliar
+        if auxTable[0][startString] == "(":
+            for k in range(1, (2 ** numOfVar.get()) + 1):
+                auxTable[k][startString] = auxTable[k][lastColumn.get()]
+                auxTable[k][finishString] = auxTable[k][lastColumn.get()]
+
+        # Tira o que estava entre parenteses da formula
+        auxTable[0] = auxTable[0][:startString] + " " * (finishString - startString + 1) + auxTable[0][finishString + 1:]
+
 
     # faz as negações
     putNeg(truthTable, auxTable, 0, len(userInput.get()))
@@ -242,8 +254,7 @@ def truthTable():
     putTruthAndOr(truthTable, auxTable, 0, len(userInput.get()))
 
     # Mostra a tabela
-    #printTruthTable(truthTable)
-    printAuxTable(auxTable)
+    printTruthTable(truthTable)
 
 # Textos e Botões iniciais
 
