@@ -4,12 +4,15 @@ import tkinter as tk
 darkGrey = '#363636'
 lightGrey = '#DCDCDC'
 midGrey = '#A9A9A9'
+blue = '#1E90FF'
 
 # Definições da Janela
+windWidth = 600
+windHeight = 500
 root = tk.Tk()
 root.title("Resolve FMI")
 root.geometry("600x500")
-root.minsize(600, 500)
+root.minsize(windWidth, windHeight)
 root.configure(bg=darkGrey)
 
 #icone
@@ -80,11 +83,18 @@ def printTruthTable(truthTable):
     spaceBetwLines = 50
     for i in range(1,(2**numOfVar.get())+1):
         for k in range(len(userInput.get())):
-            char = tk.Label(root, text=truthTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
-            char.place(x=8+spaceBetwColumns*k, y=200+spaceBetwLines*i)
+            if k == lastColumn.get():
+                char = tk.Label(root, text=truthTable[i][k], font="Verdana, 20", bg=darkGrey, fg=blue)
+                char.place(x=8 + spaceBetwColumns * k, y=200 + spaceBetwLines * i)
+            else:
+                char = tk.Label(root, text=truthTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
+                char.place(x=8+spaceBetwColumns*k, y=200+spaceBetwLines*i)
     i = i + 1
-    lastColumnLabel = tk.Label(root, text="Ultima coluna: " + str(lastColumn.get()+1), font="Verdana, 20", bg=darkGrey, fg=lightGrey)
+    lastColumnLabel = tk.Label(root, text="Ultima coluna: ", font="Verdana, 20", bg=darkGrey, fg=lightGrey)
     lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
+    canvas = tk.Canvas(root, width=20, height=20, bg=blue)
+    canvas.place(x=190 + spaceBetwColumns, y=208 + spaceBetwLines*i)
+
 
 def printAuxTable(auxTable):
     spaceBetwColumns = 30
