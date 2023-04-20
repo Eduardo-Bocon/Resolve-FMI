@@ -86,6 +86,17 @@ def printTruthTable(truthTable):
     lastColumnLabel = tk.Label(root, text="Ultima coluna: " + str(lastColumn.get()+1), font="Verdana, 20", bg=darkGrey, fg=lightGrey)
     lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
 
+def printAuxTable(auxTable):
+    spaceBetwColumns = 30
+    spaceBetwLines = 50
+    for i in range(0,(2**numOfVar.get())+1):
+        for k in range(len(userInput.get())):
+            char = tk.Label(root, text=auxTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
+            char.place(x=250+spaceBetwColumns*k, y=200+spaceBetwLines*i)
+    i = i + 1
+    lastColumnLabel = tk.Label(root, text="Ultima coluna: " + str(lastColumn.get()+1), font="Verdana, 20", bg=darkGrey, fg=lightGrey)
+    lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
+
 def putTruthVariables(truthTable, auxTable):
     for i in range(1,(2**numOfVar.get())+1):
         binary = bin(i-1)[2:]
@@ -113,9 +124,9 @@ def putTruthVariables(truthTable, auxTable):
             else:
                 truthTable[i][k] = "-"
 
-def putTruthAndOr(truthTable, auxTable):
-    for i in range(len(userInput.get())):
-        if truthTable[0][i] == '∨':
+def putTruthAndOr(truthTable, auxTable, startIndex, finishIndex):
+    for i in range(startIndex, finishIndex):
+        if auxTable[0][i] == '∨':
             for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i-1] == "T" or auxTable[k][i+1] == "T":
                     truthTable[k][i] = "T"
@@ -128,8 +139,7 @@ def putTruthAndOr(truthTable, auxTable):
                     auxTable[k][i+1] = "F"
                     auxTable[k][i-1] = "F"
             lastColumn.set(i)
-            print(i)
-        if truthTable[0][i] == '∧':
+        if auxTable[0][i] == '∧':
             for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i-1] == "T" and auxTable[k][i+1] == "T":
                     truthTable[k][i] = "T"
@@ -143,9 +153,9 @@ def putTruthAndOr(truthTable, auxTable):
                     auxTable[k][i - 1] = "F"
             lastColumn.set(i)
 
-def putNeg(truthTable, auxTable):
-    for i in range(len(userInput.get())):
-        if truthTable[0][i] == "¬":
+def putNeg(truthTable, auxTable, startIndex, finishIndex):
+    for i in range(startIndex, finishIndex):
+        if auxTable[0][i] == "¬":
             for k in range(1, (2**numOfVar.get())+1):
                 if auxTable[k][i+1] == "T":
                     truthTable[k][i] = "F"
@@ -173,7 +183,7 @@ def truthTable():
 
     setNumberOfVariables()
 
-    # cria uma matriz para a tabela
+    # cria uma matriz para a tabela que vai ser exibida ao usuario
     truthTable = []
     for i in range((2**numOfVar.get())+1):
         row = []
@@ -182,6 +192,7 @@ def truthTable():
         truthTable.append(row)
     truthTable[0] = userInput.get()
 
+    #cria uma matriz auxiliar para os calculos
     auxTable = []
     for i in range((2 ** numOfVar.get()) + 1):
         row = []
@@ -199,13 +210,48 @@ def truthTable():
     # Coloca os verdadeiros e falsos nas variaveis
     putTruthVariables(truthTable, auxTable)
 
+    # Separa e calcula primeiro o que ta em parenteses
+    indexesOpenParenth = []
+    indexesCloseParenth = []
+    for i in range(len(userInput.get())):
+        if userInput.get()[i] == '(':
+            indexesOpenParenth.append(i)
+        elif userInput.get()[i] == ')':
+            indexesCloseParenth.append(i)
+
+    for i in range(len(indexesCloseParenth)):
+        startString = 0
+        finishString = indexesCloseParenth[0]
+        for k in range(len(indexesOpenParenth)):
+            if indexesOpenParenth[k] > startString and indexesOpenParenth[k] < finishString:
+                startString = indexesOpenParenth[k]
+
+        # Remove os indices escolhidos para não serem escolhidos denovo
+        indexesOpenParenth.remove(startString)
+        indexesCloseParenth.remove(finishString)
+
+        # Faz as negações
+        putNeg(truthTable, auxTable, startString, finishString)
+
+        # Faz And e Or
+        putTruthAndOr(truthTable, auxTable, startString, finishString)
+
+        # Bota os V e F nas colunas dos parenteses na tabela auxiliar
+        if auxTable[0][startString] == "(":
+            for k in range(1, (2 ** numOfVar.get()) + 1):
+                auxTable[k][startString] = auxTable[k][lastColumn.get()]
+                auxTable[k][finishString] = auxTable[k][lastColumn.get()]
+
+        # Tira o que estava entre parenteses da formula
+        auxTable[0] = auxTable[0][:startString] + " " * (finishString - startString + 1) + auxTable[0][finishString + 1:]
+
+
     # faz as negações
-    putNeg(truthTable, auxTable)
+    putNeg(truthTable, auxTable, 0, len(userInput.get()))
+    print("Calculando de {} até {}".format(0, len(userInput.get())))
 
     # Faz And e Or
-    putTruthAndOr(truthTable, auxTable)
-
-
+    putTruthAndOr(truthTable, auxTable, 0, len(userInput.get()))
 
     # Mostra a tabela
     printTruthTable(truthTable)
