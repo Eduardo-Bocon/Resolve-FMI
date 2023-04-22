@@ -8,10 +8,10 @@ blue = '#1E90FF'
 
 # Definições da Janela
 windWidth = 600
-windHeight = 500
+windHeight = 700
 root = tk.Tk()
 root.title("Resolve FMI")
-root.geometry("600x500")
+root.geometry("600x700")
 root.minsize(windWidth, windHeight)
 root.configure(bg=darkGrey)
 
@@ -29,15 +29,18 @@ numOfVar = tk.IntVar() # salva o numero de variaveis
 
 # Funções para entrada do usuario
 def addP():
-    if checkCharLimit() and checkLastCharPQ():
+    if checkCharLimit() and checkLastCharVar():
         userInput.set(userInput.get() + "P")
 
 def addQ():
-    if checkCharLimit() and checkLastCharPQ():
+    if checkCharLimit() and checkLastCharVar():
         userInput.set(userInput.get() + "Q")
 
+def addR():
+    if checkCharLimit() and checkLastCharVar():
+        userInput.set(userInput.get() + "R")
 def addNeg():
-    if checkCharLimit():
+    if checkCharLimit() and checkLastCharNeg():
         userInput.set(userInput.get() + "¬")
 
 def addOpP():
@@ -65,15 +68,21 @@ def checkCharLimit():
         return False
     return True
 
-def checkLastCharPQ():
+def checkLastCharVar():
     if len(userInput.get()) > 0:
-        if userInput.get()[-1] == "P" or userInput.get()[-1] == "Q":
+        if userInput.get()[-1] == "P" or userInput.get()[-1] == "Q" or userInput.get()[-1] == "R":
             return False
     return True
 
 def checkLastCharAndOr():
     if len(userInput.get()) > 0:
-        if userInput.get()[-1] == "∨" or userInput.get()[-1] == "∧":
+        if userInput.get()[-1] == "∨" or userInput.get()[-1] == "∧" or userInput.get()[-1] == "¬":
+            return False
+    return True
+
+def checkLastCharNeg():
+    if len(userInput.get()) > 0:
+        if userInput.get()[-1] == "¬" or userInput.get()[-1] == "P" or userInput.get()[-1] == "Q" or userInput.get()[-1] == "R":
             return False
     return True
 
@@ -90,10 +99,10 @@ def printTruthTable(truthTable):
                 char = tk.Label(root, text=truthTable[i][k], font="Verdana, 20", bg=darkGrey, fg=lightGrey)
                 char.place(x=8+spaceBetwColumns*k, y=200+spaceBetwLines*i)
     i = i + 1
-    lastColumnLabel = tk.Label(root, text="Ultima coluna: ", font="Verdana, 20", bg=darkGrey, fg=lightGrey)
-    lastColumnLabel.place(x=8+spaceBetwColumns, y=200+spaceBetwLines*i)
-    canvas = tk.Canvas(root, width=20, height=20, bg=blue)
-    canvas.place(x=190 + spaceBetwColumns, y=208 + spaceBetwLines*i)
+    lastColumnLabel = tk.Label(root, text="Ultima coluna", font="Verdana, 20", bg=darkGrey, fg=lightGrey)
+    lastColumnLabel.place(x=50, y=200+spaceBetwLines*i)
+    canvas = tk.Canvas(root, width=20, height=20, bg=blue, highlightthickness=0)
+    canvas.place(x=20, y=208 + spaceBetwLines*i)
 
 
 def printAuxTable(auxTable):
@@ -116,16 +125,30 @@ def putTruthVariables(truthTable, auxTable):
         while len(binary) < numOfVar.get():
             binary = '0' + binary
 
+        binPosition = [0,1,2]
+        if not "P" in truthTable[0]:
+            binPosition.insert(0, 0)
+        if not "Q" in truthTable[0]:
+            binPosition.insert(1, 0)
+        if not "R" in truthTable[0]:
+                binPosition.insert(2,0)
         for k in range(len(userInput.get())):
             if truthTable[0][k] == "P":
-                if binary[0] == '0':
+                if binary[binPosition[0]] == '0':
                     truthTable[i][k] = "T"
                     auxTable[i][k] = "T"
                 else:
                     truthTable[i][k] = "F"
                     auxTable[i][k] = "F"
             elif truthTable[0][k] == "Q":
-                if binary[1] == '0':
+                if binary[binPosition[1]] == '0':
+                    truthTable[i][k] = "T"
+                    auxTable[i][k] = "T"
+                else:
+                    truthTable[i][k] = "F"
+                    auxTable[i][k] = "F"
+            elif truthTable[0][k] == "R":
+                if binary[binPosition[2]] == '0':
                     truthTable[i][k] = "T"
                     auxTable[i][k] = "T"
                 else:
@@ -182,6 +205,8 @@ def setNumberOfVariables():
     if 'P' in userInput.get():
         numOfVar.set(numOfVar.get() + 1)
     if 'Q' in userInput.get():
+        numOfVar.set(numOfVar.get() + 1)
+    if 'R' in userInput.get():
         numOfVar.set(numOfVar.get() + 1)
 
 # Função principal da tabela da verdade
@@ -258,7 +283,6 @@ def truthTable():
 
     # faz as negações
     putNeg(truthTable, auxTable, 0, len(userInput.get()))
-    print("Calculando de {} até {}".format(0, len(userInput.get())))
 
     # Faz And e Or
     putTruthAndOr(truthTable, auxTable, 0, len(userInput.get()))
@@ -274,6 +298,7 @@ buttonSize = 20
 
 buttonP = tk.Button(root, text="P", padx=buttonSize, pady=buttonSize, bg = midGrey, command=addP)
 buttonQ = tk.Button(root, text="Q", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addQ)
+buttonR = tk.Button(root, text="R", padx=buttonSize, pady=buttonSize, bg=midGrey, command=addR)
 buttonNeg = tk.Button(root, text="¬", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addNeg)
 buttonOpParentesis = tk.Button(root, text="(", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addOpP)
 buttonCloParentesis = tk.Button(root, text=")", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addClP)
@@ -293,12 +318,13 @@ columnSpace = 60
 formula.place(x=5, y=row1)
 buttonP.place(x=2, y=row2)
 buttonQ.place(x=columnSpace, y=row2)
-buttonNeg.place(x=columnSpace*2, y=row2)
-buttonOpParentesis.place(x=columnSpace*3, y=row2)
-buttonCloParentesis.place(x=columnSpace*4, y=row2)
-buttonOr.place(x=columnSpace*5, y=row2)
-buttonAnd.place(x=columnSpace*6, y=row2)
-buttonDel.place(x=columnSpace*7, y=row2)
+buttonR.place(x=columnSpace*2, y=row2)
+buttonNeg.place(x=columnSpace*3, y=row2)
+buttonOpParentesis.place(x=columnSpace*4, y=row2)
+buttonCloParentesis.place(x=columnSpace*5, y=row2)
+buttonOr.place(x=columnSpace*6, y=row2)
+buttonAnd.place(x=columnSpace*7, y=row2)
+buttonDel.place(x=columnSpace*8, y=row2)
 buttonTruthTable.place(x=140, y=row3)
 
 # loop principal
