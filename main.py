@@ -22,6 +22,7 @@ root.iconbitmap(default=icon)
 # Definições da entrada do usuario
 userInput = tk.StringVar()
 userInput.set("")
+# teste: P∨Q∨R∧¬(P∧Q)∧¬(P∧R)∧¬(Q∧R)
 
 lastColumn = tk.IntVar() # salva qual foi a ultima coluna calculada
 
@@ -63,7 +64,7 @@ def delet():
     userInput.set(userInput.get()[:-1])
 
 def checkCharLimit():
-    inputMaximo = 15
+    inputMaximo = 30
     if len(userInput.get()) > inputMaximo:
         return False
     return True
@@ -132,6 +133,7 @@ def putTruthVariables(truthTable, auxTable):
             binPosition.insert(1, 0)
         if not "R" in truthTable[0]:
                 binPosition.insert(2,0)
+
         for k in range(len(userInput.get())):
             if truthTable[0][k] == "P":
                 if binary[binPosition[0]] == '0':
@@ -165,11 +167,43 @@ def putTruthAndOr(truthTable, auxTable, startIndex, finishIndex):
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
                     auxTable[k][i+1] = "T"
+                    if truthTable[0][i+1] == "¬":
+                        auxTable[k][i + 2] = "T"
+                        if truthTable[0][i+2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i+j] = "T"
+                                if truthTable[0][i+j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                        j = 2
+                        while 1:
+                            auxTable[k][i + j] = "T"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
                     auxTable[k][i-1] = "T"
                 else:
                     truthTable[k][i] = "F"
                     auxTable[k][i] = "F"
                     auxTable[k][i+1] = "F"
+                    if truthTable[0][i + 1] == "¬":
+                        auxTable[k][i + 2] = "F"
+                        if truthTable[0][i + 2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i + j] = "F"
+                                if truthTable[0][i + j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i + j] = "F"
+                                if truthTable[0][i + j] == ")":
+                                    break
+                                j = j + 1
                     auxTable[k][i-1] = "F"
             lastColumn.set(i)
         if auxTable[0][i] == '∧':
@@ -178,11 +212,43 @@ def putTruthAndOr(truthTable, auxTable, startIndex, finishIndex):
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
                     auxTable[k][i + 1] = "T"
+                    if truthTable[0][i+1] == "¬":
+                        auxTable[k][i + 2] = "T"
+                        if truthTable[0][i+2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i+j] = "T"
+                                if truthTable[0][i+j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                        j = 2
+                        while 1:
+                            auxTable[k][i + j] = "T"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
                     auxTable[k][i - 1] = "T"
                 else:
                     truthTable[k][i] = "F"
                     auxTable[k][i] = "F"
                     auxTable[k][i + 1] = "F"
+                    if truthTable[0][i+1] == "¬":
+                        auxTable[k][i + 2] = "T"
+                        if truthTable[0][i+2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i+j] = "F"
+                                if truthTable[0][i+j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                        j = 2
+                        while 1:
+                            auxTable[k][i + j] = "F"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
                     auxTable[k][i - 1] = "F"
             lastColumn.set(i)
 
@@ -193,11 +259,27 @@ def putNeg(truthTable, auxTable, startIndex, finishIndex):
                 if auxTable[k][i+1] == "T":
                     truthTable[k][i] = "F"
                     auxTable[k][i] = "F"
-                    auxTable[k][i + 1] = "F"
+                    if truthTable[0][i+1] == "(":
+                        j = 1
+                        while 1:
+                            auxTable[k][i+j] = "F"
+                            if truthTable[0][i+j] == ")":
+                                break
+                            j = j + 1
+                    else:
+                        auxTable[k][i + 1] = "F"
                 elif auxTable[k][i+1] == "F":
                     truthTable[k][i] = "T"
                     auxTable[k][i] = "T"
-                    auxTable[k][i + 1] = "T"
+                    if truthTable[0][i + 1] == "(":
+                        j = 1
+                        while 1:
+                            auxTable[k][i + j] = "T"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
+                    else:
+                        auxTable[k][i + 1] = "T"
             lastColumn.set(i)
 
 def setNumberOfVariables():
