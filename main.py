@@ -63,6 +63,11 @@ def addAnd():
 def addImp():
     if checkCharLimit() and checkLastCharAndOr():
         userInput.set(userInput.get() + "→")
+
+def addEqui():
+    if checkCharLimit() and checkLastCharAndOr():
+        userInput.set(userInput.get() + "↔")
+
 def delet():
     userInput.set(userInput.get()[:-1])
 
@@ -350,6 +355,71 @@ def putImp(truthTable, auxTable, startIndex, finishIndex):
                         auxTable[k][i - 1] = "T"
             lastColumn.set(i)
 
+def putEqui(truthTable, auxTable, startIndex, finishIndex):
+    for i in range(finishIndex-1, startIndex-1,-1):
+        if auxTable[0][i] == '↔':
+            for k in range(1, (2 ** numOfVar.get()) + 1):
+                if auxTable[k][i - 1] == auxTable[k][i + 1]:
+                    truthTable[k][i] = "T"
+                    auxTable[k][i] = "T"
+                    auxTable[k][i + 1] = "T"
+                    if truthTable[0][i + 1] == "¬":
+                        auxTable[k][i + 2] = "T"
+                        if truthTable[0][i + 2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i + j] = "T"
+                                if truthTable[0][i + j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                        j = 2
+                        while 1:
+                            auxTable[k][i + j] = "T"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
+                    if truthTable[0][i - 1] == ")":
+                        j = 1
+                        while 1:
+                            auxTable[k][i - j] = "T"
+                            if truthTable[0][i - j] == "(":
+                                break
+                            j = j + 1
+                    else:
+                        auxTable[k][i - 1] = "T"
+                else:
+
+                    truthTable[k][i] = "F"
+                    auxTable[k][i] = "F"
+                    auxTable[k][i + 1] = "F"
+                    if truthTable[0][i + 1] == "¬":
+                        auxTable[k][i + 2] = "F"
+                        if truthTable[0][i + 2] == "(":
+                            j = 2
+                            while 1:
+                                auxTable[k][i + j] = "F"
+                                if truthTable[0][i + j] == ")":
+                                    break
+                                j = j + 1
+                    elif truthTable[0][i + 1] == "(":
+                        j = 2
+                        while 1:
+                            auxTable[k][i + j] = "F"
+                            if truthTable[0][i + j] == ")":
+                                break
+                            j = j + 1
+                    if truthTable[0][i - 1] == ")":
+                        j = 1
+                        while 1:
+                            auxTable[k][i - j] = "F"
+                            if truthTable[0][i - j] == "(":
+                                break
+                            j = j + 1
+                    else:
+                        auxTable[k][i - 1] = "T"
+            lastColumn.set(i)
+
 def setNumberOfVariables():
     numOfVar.set(0)
     if 'P' in userInput.get():
@@ -424,6 +494,8 @@ def truthTable():
         # Faz as implicações
         putImp(truthTable,auxTable,startString,finishString)
 
+        putEqui(truthTable, auxTable, 0, len(userInput.get()))
+
         # Bota os V e F nas colunas dos parenteses na tabela auxiliar
         if auxTable[0][startString] == "(":
             for k in range(1, (2 ** numOfVar.get()) + 1):
@@ -443,6 +515,8 @@ def truthTable():
     # Faz as implicações
     putImp(truthTable, auxTable, 0, len(userInput.get()))
 
+    putEqui(truthTable, auxTable, 0, len(userInput.get()))
+
     # Mostra a tabela
     printTruthTable(truthTable)
 
@@ -461,6 +535,7 @@ buttonCloParentesis = tk.Button(root, text=")", padx=buttonSize, pady=buttonSize
 buttonOr = tk.Button(root, text="∨", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addOr)
 buttonAnd = tk.Button(root, text="∧", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addAnd)
 buttonImp = tk.Button(root, text="→", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addImp)
+buttonEqui = tk.Button(root, text="↔", padx=buttonSize, pady=buttonSize,bg = midGrey, command=addEqui)
 buttonDel = tk.Button(root, text="Del", padx=buttonSize, pady=buttonSize,bg = midGrey, command=delet)
 buttonTruthTable = tk.Button(root, text="Ver a tabela da verdade", padx=buttonSize, pady=buttonSize,bg = midGrey, command=truthTable)
 
@@ -482,7 +557,8 @@ buttonCloParentesis.place(x=columnSpace*5, y=row2)
 buttonOr.place(x=columnSpace*6, y=row2)
 buttonAnd.place(x=columnSpace*7, y=row2)
 buttonImp.place(x=columnSpace*8, y=row2)
-buttonDel.place(x=columnSpace*9, y=row2)
+buttonEqui.place(x=columnSpace*9, y=row2)
+buttonDel.place(x=columnSpace*10, y=row2)
 buttonTruthTable.place(x=140, y=row3)
 
 # loop principal
